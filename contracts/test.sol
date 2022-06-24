@@ -49,4 +49,12 @@ contract StakingToken {
         return balances[account];
     }
 
+    function mint(address account, uint256 amount)  public{
+        require(account != address(0),"cannot mint into zero address");
+
+        totalSupply= totalSupply + amount;
+        balances[account] = balances[account] + amount;
+
+        emit Transfer(address(0), account, amount);
+    }
 }
