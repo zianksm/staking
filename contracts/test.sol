@@ -45,5 +45,8 @@ contract StakingToken {
         return decimals;
     }
 
-    
+    function getBalance(address account) external view returns (uint256){
+        return balances[account];
+    }
+
 }

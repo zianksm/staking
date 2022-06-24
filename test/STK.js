@@ -1,6 +1,7 @@
 const { assert } = require("chai");
 
 const STK = artifacts.require("StakingToken");
+let address;
 
 function deploy() {
   let token = STK.deployed();
