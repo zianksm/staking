@@ -49,6 +49,12 @@ contract StakingToken {
         return balances[account];
     }
 
+    function getContractAddress() external view returns (address){
+        address contractAddress = address(this);
+
+        return contractAddress;
+    }
+
     function mint(address account, uint256 amount)  public{
         require(account != address(0),"cannot mint into zero address");
 
@@ -56,5 +62,16 @@ contract StakingToken {
         balances[account] = balances[account] + amount;
 
         emit Transfer(address(0), account, amount);
+    }
+
+    function burn(address account, uint256 amount) public {
+        require(account != address(0),"cannot mint into zero address");
+        require(balances[account] >= amount, "balance is not enough to burn");
+
+        totalSupply = totalSupply - amount;
+        balances[account] = balances[account] - amount;
+
+        emit Transfer(account, address(0), amount);
+
     }
 }
