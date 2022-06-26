@@ -128,13 +128,13 @@ contract("StakingToken", async (accounts) => {
     let amount = 100;
 
     try{
-      await token.transfer(accounts[3],"0x0000000000000000000000000000000000000000", amount)
+      await token.transfer("0x0000000000000000000000000000000000000000", amount, {from:accounts[3]})
     }catch(error){
       assert.equal(error.reason, "transfer to zero address is prohibited", "fail to to transfer to zero address");
     }
 
     try{
-      await token.transfer(accounts[3], accounts[4],amount);
+      await token.transfer(accounts[4],amount, {from:accounts[3]});
     }catch(error){
       assert.equal(error.reason, "not enough token to transfer");
     }
@@ -143,7 +143,7 @@ contract("StakingToken", async (accounts) => {
     let balancesBeforeTransferRecipient = await token.getBalance(accounts[4]);
 
     await token.mint(accounts[3], amount);
-    let tf = await token.transfer(accounts[3], accounts[4], amount);
+    let tf = await token.transfer(accounts[4], amount, {from:accounts[3]});
 
     let balancesAfterTransferSender = await token.getBalance(accounts[3]);
     let balancesAfterTransferRecipient = await token.getBalance(accounts[4]);

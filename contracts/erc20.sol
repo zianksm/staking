@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.9.0;
 
-contract StakingToken {
+import "./staking.sol";
+
+contract StakingToken is Stakable {
     // required variable for the token operation
 
     uint256 private totalSupply;
     uint8 private decimals;
     string private name;
     string private symbol;
+    address private owner;
+
+    modifier onlyOwner{
+        require(msg.sender == owner);
+        _;
+    }
+    
 
     mapping(address => uint256) private balances;
 
@@ -25,8 +34,13 @@ contract StakingToken {
         decimals = tokenDecimals;
 
         balances[msg.sender] = totalSupply;
+        owner = msg.sender;
 
         emit Transfer(address(0), msg.sender, totalSupply);
+    }
+
+    function getOwner() view external returns(address){
+        return owner;
     }
 
     function getName() external view returns (string memory) {
@@ -55,7 +69,7 @@ contract StakingToken {
         return contractAddress;
     }
 
-    function mint(address account, uint256 amount) public {
+    function _mint(address account, uint256 amount) internal {
         require(account != address(0), "cannot mint into zero address");
 
         totalSupply = totalSupply + amount;
@@ -64,7 +78,13 @@ contract StakingToken {
         emit Transfer(address(0), account, amount);
     }
 
-    function burn(address account, uint256 amount) public {
+    function mint(address account, uint256 amount) onlyOwner external returns(bool) {
+        _mint(account, amount);
+        
+        return true;
+    }
+
+    function _burn(address account, uint256 amount) internal {
         require(account != address(0), "cannot burn into zero address");
         require(balances[account] >= amount, "not enough token to burn");
 
@@ -72,6 +92,12 @@ contract StakingToken {
         balances[account] = balances[account] - amount;
 
         emit Transfer(account, address(0), amount);
+    }
+
+    function burn(address account, uint256 amount) onlyOwner external returns(bool){
+        _burn(account, amount);
+
+        return true;
     }
 
     function transferLogic(address sender, address receipient, uint256 amount) internal {
@@ -84,8 +110,8 @@ contract StakingToken {
         emit Transfer(sender, receipient, amount);
     }
 
-    function transfer(address sender, address receipient, uint256 amount) external returns(bool) {
-        transferLogic(sender,receipient,amount);
+    function transfer(address receipient, uint256 amount) external returns(bool) {
+        transferLogic(msg.sender,receipient,amount);
 
         return true;
     }

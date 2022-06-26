@@ -1,0 +1,117 @@
+{
+  "contractName": "Stakable",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.13+commit.abaa5c0e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/staking.sol\":\"Stakable\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/staking.sol\":{\"keccak256\":\"0x3837b9d6f6f08d90b4c4bafff39952e86a3488bf058f5bfbeff9aaf522d53f4f\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e0c6b98fd7118a12a1fd1e629e69793fa7cc876b89eb036fdc3fb5815aa8e5dd\",\"dweb:/ipfs/QmPTkE1i46E9Yk1WvvEdvZcJT4WaSLmryADfznzk1W3jvZ\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220c2242273de77676adbab461734f17861d95a87ea3023af81ef4b4fd5a472944a64736f6c634300080d0033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220c2242273de77676adbab461734f17861d95a87ea3023af81ef4b4fd5a472944a64736f6c634300080d0033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "68:54:1:-:0;;;94:23;;;;;;;;;;68:54;;;;;;",
+  "deployedSourceMap": "68:54:1:-:0;;;;;",
+  "source": "// SPDX-License-Identifier: MIT\r\npragma solidity >=0.5.0 <0.9.0;\r\n\r\ncontract Stakable{\r\n\r\n    constructor(){\r\n\r\n    }\r\n\r\n}",
+  "sourcePath": "C:\\Users\\ASUS\\Documents\\GitHub\\tugas-axel\\staking\\contracts\\staking.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/staking.sol",
+    "exportedSymbols": {
+      "Stakable": [
+        367
+      ]
+    },
+    "id": 368,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 362,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "33:31:1"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "Stakable",
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 367,
+        "linearizedBaseContracts": [
+          367
+        ],
+        "name": "Stakable",
+        "nameLocation": "77:8:1",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 365,
+              "nodeType": "Block",
+              "src": "107:10:1",
+              "statements": []
+            },
+            "id": 366,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [],
+            "name": "",
+            "nameLocation": "-1:-1:-1",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 363,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "105:2:1"
+            },
+            "returnParameters": {
+              "id": 364,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "107:0:1"
+            },
+            "scope": 367,
+            "src": "94:23:1",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 368,
+        "src": "68:54:1",
+        "usedErrors": []
+      }
+    ],
+    "src": "33:89:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.13+commit.abaa5c0e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.7",
+  "updatedAt": "2022-06-26T13:06:00.158Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
