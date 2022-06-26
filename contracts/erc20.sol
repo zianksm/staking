@@ -45,33 +45,48 @@ contract StakingToken {
         return decimals;
     }
 
-    function getBalance(address account) external view returns (uint256){
+    function getBalance(address account) external view returns (uint256) {
         return balances[account];
     }
 
-    function getContractAddress() external view returns (address){
+    function getContractAddress() external view returns (address) {
         address contractAddress = address(this);
 
         return contractAddress;
     }
 
-    function mint(address account, uint256 amount)  public{
-        require(account != address(0),"cannot mint into zero address");
+    function mint(address account, uint256 amount) public {
+        require(account != address(0), "cannot mint into zero address");
 
-        totalSupply= totalSupply + amount;
+        totalSupply = totalSupply + amount;
         balances[account] = balances[account] + amount;
 
         emit Transfer(address(0), account, amount);
     }
 
     function burn(address account, uint256 amount) public {
-        require(account != address(0),"cannot mint into zero address");
-        require(balances[account] >= amount, "balance is not enough to burn");
+        require(account != address(0), "cannot burn into zero address");
+        require(balances[account] >= amount, "not enough token to burn");
 
         totalSupply = totalSupply - amount;
         balances[account] = balances[account] - amount;
 
         emit Transfer(account, address(0), amount);
+    }
 
+    function transferLogic(address sender, address receipient, uint256 amount) internal {
+        require(receipient != address(0),"transfer to zero address is prohibited");
+        require(balances[sender] >= amount, "not enough token to transfer");
+
+        balances[sender] = balances[sender] - amount;
+        balances[receipient] = balances[receipient] + amount;
+
+        emit Transfer(sender, receipient, amount);
+    }
+
+    function transfer(address sender, address receipient, uint256 amount) external returns(bool) {
+        transferLogic(sender,receipient,amount);
+
+        return true;
     }
 }
