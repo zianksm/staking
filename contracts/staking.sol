@@ -13,11 +13,17 @@ contract Stakable {
         address user;
         uint256 amount;
         uint256 timestamp;
+        uint256 claimable;
+    }
+
+    struct StakingSummary {
+        uint256 totalAmount;
+        Stake[] stakes;
     }
 
     struct Stakeholder {
         address user;
-        Stake[] stakes_address;
+        Stake[] StakesAddress;
     }
 
     Stakeholder[] internal stakeholders;
@@ -52,19 +58,22 @@ contract Stakable {
             index = addStakeHolder(msg.sender);
         }
 
-        stakeholders[index].stakes_address.push(
-            Stake(msg.sender, amount, timestamp)
+        stakeholders[index].StakesAddress.push(
+            Stake(msg.sender, amount, timestamp, 0)
         );
 
         emit Staked(msg.sender, amount, index, timestamp);
     }
 
-    function withdrawLogic(uint256 amount, uint256 index) internal returns(uint256) {
+    function withdrawLogic(uint256 amount, uint256 index)
+        internal
+        returns (uint256)
+    {
         // get the uesr index in the array of stakeholders
         uint256 user_index = stakes[msg.sender];
 
         // get the desired stake for withdrawal
-        Stake memory currentStake = stakeholders[user_index].stakes_address[
+        Stake memory currentStake = stakeholders[user_index].StakesAddress[
             index
         ];
         require(
@@ -79,14 +88,14 @@ contract Stakable {
 
         if (currentStake.amount == 0) {
             // delete the current stake if the staked amount is 0
-            delete stakeholders[user_index].stakes_address[index];
+            delete stakeholders[user_index].StakesAddress[index];
         } else {
             // replace the value of the current staked value with the new staked value after withdrawal
-            stakeholders[user_index].stakes_address[index].amount = currentStake
+            stakeholders[user_index].StakesAddress[index].amount = currentStake
                 .amount;
 
             // reset the stakes timestamp
-            stakeholders[user_index].stakes_address[index].timestamp = block
+            stakeholders[user_index].StakesAddress[index].timestamp = block
                 .timestamp;
         }
 
@@ -109,5 +118,31 @@ contract Stakable {
         reward = reward / (rewardRate / 100);
 
         return reward;
+    }
+
+    function hasStake(address staker)
+        external
+        view
+        returns (StakingSummary memory)
+    {
+        uint256 totalStakeAmount;
+
+        uint256 user_index = stakes[staker];
+
+        // get the stakes array
+        StakingSummary memory summary = StakingSummary(
+            0,
+            stakeholders[user_index].StakesAddress
+        );
+
+        // loop through the stakes array calculating reward and the total stake amount
+        for (uint256 i = 0; i < summary.stakes.length; i += 1) {
+            uint256 reward = calculateReward(summary.stakes[i]);
+            summary.stakes[i].claimable = reward;
+            totalStakeAmount = totalStakeAmount + summary.stakes[i].amount;
+        }
+
+        summary.totalAmount = totalStakeAmount;
+        return summary;
     }
 }
