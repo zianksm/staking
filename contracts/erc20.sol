@@ -115,4 +115,14 @@ contract StakingToken is Stakable {
 
         return true;
     }
+
+    function stake(uint256 amount) external returns(bool) {
+        require(amount <= balances[msg.sender],"can't stake more than you own");
+
+        stakeLogic(amount);
+
+        _burn(msg.sender, amount);
+
+        return true;
+    }
 }

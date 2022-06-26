@@ -9,7 +9,6 @@ function deploy() {
 }
 
 contract("StakingToken", async (accounts) => {
-  
   it("total supply", async () => {
     let token = await deploy();
     let supply = await token.getTotalSupply();
@@ -67,7 +66,11 @@ contract("StakingToken", async (accounts) => {
     let accountBalance = await token.getBalance(accounts[1]);
     let afterMintTotalSupply = await token.getTotalSupply();
 
-    assert.equal(amount, accountBalance, "after minting to balance should be 100");
+    assert.equal(
+      amount,
+      accountBalance,
+      "after minting to balance should be 100"
+    );
     assert.equal(
       afterMintTotalSupply.toNumber(),
       beforeMintTotalSupply.toNumber() + accountBalance.toNumber(),
@@ -75,10 +78,7 @@ contract("StakingToken", async (accounts) => {
     );
 
     try {
-      await token.mint(
-        "0x0000000000000000000000000000000000000000",
-        amount
-      );
+      await token.mint("0x0000000000000000000000000000000000000000", amount);
     } catch (error) {
       assert.equal(
         error.reason,
@@ -96,13 +96,20 @@ contract("StakingToken", async (accounts) => {
     let beforeBurnTotalSupply = await token.getTotalSupply();
     let beforeBurnBalance = await token.getBalance(accounts[1]);
 
-
     let burn = await token.burn(accounts[1], amount);
     let afterBurnTotalSupply = await token.getTotalSupply();
     let afterBurnBalance = await token.getBalance(accounts[1]);
 
-    assert.equal(afterBurnTotalSupply, beforeBurnTotalSupply - amount, "expected supply doesn't match up");
-    assert.equal(afterBurnBalance, beforeBurnBalance - amount, "expected balance doesn't match up");
+    assert.equal(
+      afterBurnTotalSupply,
+      beforeBurnTotalSupply - amount,
+      "expected supply doesn't match up"
+    );
+    assert.equal(
+      afterBurnBalance,
+      beforeBurnBalance - amount,
+      "expected balance doesn't match up"
+    );
 
     try {
       await token.burn("0x0000000000000000000000000000000000000000", amount);
@@ -117,25 +124,36 @@ contract("StakingToken", async (accounts) => {
     try {
       await token.burn(accounts[1], 200);
     } catch (error) {
-      assert.equal(error.reason, "not enough token to burn","fail to burn token");
+      assert.equal(
+        error.reason,
+        "not enough token to burn",
+        "fail to burn token"
+      );
     }
   });
 
-  it("transfer", async ()=> {
-
+  it("transfer", async () => {
     let token = await deploy();
 
     let amount = 100;
 
-    try{
-      await token.transfer("0x0000000000000000000000000000000000000000", amount, {from:accounts[3]})
-    }catch(error){
-      assert.equal(error.reason, "transfer to zero address is prohibited", "fail to to transfer to zero address");
+    try {
+      await token.transfer(
+        "0x0000000000000000000000000000000000000000",
+        amount,
+        { from: accounts[3] }
+      );
+    } catch (error) {
+      assert.equal(
+        error.reason,
+        "transfer to zero address is prohibited",
+        "fail to to transfer to zero address"
+      );
     }
 
-    try{
-      await token.transfer(accounts[4],amount, {from:accounts[3]});
-    }catch(error){
+    try {
+      await token.transfer(accounts[4], amount, { from: accounts[3] });
+    } catch (error) {
       assert.equal(error.reason, "not enough token to transfer");
     }
 
@@ -143,18 +161,24 @@ contract("StakingToken", async (accounts) => {
     let balancesBeforeTransferRecipient = await token.getBalance(accounts[4]);
 
     await token.mint(accounts[3], amount);
-    let tf = await token.transfer(accounts[4], amount, {from:accounts[3]});
+    let tf = await token.transfer(accounts[4], amount, { from: accounts[3] });
 
     let balancesAfterTransferSender = await token.getBalance(accounts[3]);
     let balancesAfterTransferRecipient = await token.getBalance(accounts[4]);
 
-
     assert.equal(tf.receipt.status, true, "transfer is not successful");
-    assert.equal(balancesAfterTransferSender.words[0], balancesBeforeTransferSender.words[0] , "expected balance did not match up");
-    assert.equal(balancesAfterTransferRecipient.words[0], balancesBeforeTransferRecipient.words[0] + amount,"expected balance did not match up")
+    assert.equal(
+      balancesAfterTransferSender.words[0],
+      balancesBeforeTransferSender.words[0],
+      "expected balance did not match up"
+    );
+    assert.equal(
+      balancesAfterTransferRecipient.words[0],
+      balancesBeforeTransferRecipient.words[0] + amount,
+      "expected balance did not match up"
+    );
 
     token.burn(accounts[4], amount);
-
-  })
+  });
   //todo : add burn function test
 });
