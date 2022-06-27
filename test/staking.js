@@ -138,4 +138,64 @@ contract("StakingToken", async (accounts) => {
       "fail to remove stake when it was empty"
     );
   });
+
+  it("calculate rewards", async () => {
+    let token = await deploy();
+
+    let amount = 100;
+    let owner = accounts[5];
+    let index = 0;
+    //should be the same as the smart contract reward rate
+    let rewardRate = 8;
+    //should be the same as the smart contract divide rate
+    let divideRate = 100;
+    let reward = (amount * rewardRate) / divideRate;
+
+    await token.mint(owner, amount);
+
+    await token.stake(amount, { from: owner });
+
+    let newbBlock = await helpers.advanceTimeAndBlock(3600 * 1);
+
+    let summaryAfter = await token.hasStake(owner);
+
+    assert.equal(
+      summaryAfter.stakes[index].claimable,
+      reward,
+      "reward didn't match up"
+    );
+  });
+
+  it("withdraw from staked token", async () => {
+    let token = await deploy();
+
+    let amount = 100;
+
+    //should be the same as the smart contract reward rate
+    let rewardRate = 8;
+    //should be the same as the smart contract divide rate
+    let divideRate = 100;
+    let reward = (amount * rewardRate) / divideRate;
+
+    let owner = accounts[8];
+    let index = 0;
+
+    await token.mint(owner, amount);
+    await token.stake(amount, { from: owner });
+
+    let newbBlock = await helpers.advanceTimeAndBlock(3600 * 1);
+    let initialSummary = await token.hasStake(owner);
+    let initialBalance = await token.getBalance(owner);
+
+    await token.widthdrawStake(amount, 0, { from: owner });
+
+    let afterBalance = await token.getBalance(owner);
+    let afterSummary = await token.hasStake(owner);
+
+    assert.equal(
+      afterSummary.stakes[index].claimable,
+      initialSummary.stakes[index].claimable - reward
+    );
+    assert.equal(afterBalance, amount + reward);
+  });
 });

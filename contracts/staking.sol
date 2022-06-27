@@ -2,8 +2,10 @@
 pragma solidity >=0.5.0 <0.9.0;
 
 contract Stakable {
-    uint256 rewardRate = 10;
-
+    // 10% reward rate per hour(make it and the post-fix larger to represent decimals)
+    uint256 rewardRate = 8;
+    // post-fix to divide as so it will be the same as multiplying with %(make it larger to represent decimals)
+    uint256 divideRate = 100;
     constructor() {
         // push to avoid index -1 bug
         stakeholders.push();
@@ -108,14 +110,14 @@ contract Stakable {
         returns (uint256)
     {
         // find the durations
-        uint256 durationSeconds = block.timestamp - currentStake.timestamp;
-        durationSeconds = durationSeconds / 1 hours;
+        uint256 duration = block.timestamp - currentStake.timestamp;
+        duration = duration / 1 hours;
 
-        // multiply by the staking amount(this return 100% yield rate)
-        uint256 reward = durationSeconds * currentStake.amount;
+        // multiply by the staking amount(this return 1000% yield rate /token staked)
+        uint256 reward = duration * currentStake.amount;
 
-        // find the real reward by dividing with the % reward rate
-        reward = reward * (rewardRate / 100);
+        // find the real reward by dividing with the reward rate to get  the real reward precentage(1000 / your reward rate); 
+        reward = reward * rewardRate / divideRate;
 
         return reward;
     }

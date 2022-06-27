@@ -39,6 +39,10 @@ contract StakingToken is Stakable {
         emit Transfer(address(0), msg.sender, totalSupply);
     }
 
+    function getBlockTime() external  view returns(uint256){
+         return block.timestamp;
+    }
+
     function getOwner() view external returns(address){
         return owner;
     }
