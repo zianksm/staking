@@ -115,7 +115,7 @@ contract Stakable {
         uint256 reward = durationSeconds * currentStake.amount;
 
         // find the real reward by dividing with the % reward rate
-        reward = reward / (rewardRate / 100);
+        reward = reward * (rewardRate / 100);
 
         return reward;
     }
