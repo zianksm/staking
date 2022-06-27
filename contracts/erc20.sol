@@ -128,9 +128,9 @@ contract StakingToken is Stakable {
 
     function widthdrawStake(uint256 amount, uint256 stake_index) external returns(bool) {
 
-        withdrawLogic(amount, stake_index);
+       uint256 amountToMint = withdrawLogic(amount, stake_index);
 
-        _mint(msg.sender, amount);
+        _mint(msg.sender, amountToMint);
 
         return true;
     }

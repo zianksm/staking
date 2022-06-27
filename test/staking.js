@@ -119,4 +119,23 @@ contract("StakingToken", async (accounts) => {
       "expected total amount didn't match up"
     );
   });
+
+  it("remove stake if empty", async () => {
+    let token = await deploy();
+
+    let owner = accounts[0];
+    let index = 0;
+    let amount = 50;
+
+    await token.stake(amount, { from: owner });
+    await token.widthdrawStake(amount, 0);
+
+    let summary = await token.hasStake(owner);
+
+    assert.equal(
+      summary.stakes[index].user,
+      "0x0000000000000000000000000000000000000000",
+      "fail to remove stake when it was empty"
+    );
+  });
 });
