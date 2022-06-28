@@ -1,14 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0 <0.9.0;
-
 contract Stakable {
+
     // 10% reward rate per hour(make it and the post-fix larger to represent decimals)
     uint256 rewardRate = 8;
     // post-fix to divide as so it will be the same as multiplying with %(make it larger to represent decimals)
     uint256 divideRate = 100;
+
+    address private owner;
+
     constructor() {
         // push to avoid index -1 bug
         stakeholders.push();
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
     }
 
     struct Stake {
@@ -101,7 +110,7 @@ contract Stakable {
                 .timestamp;
         }
 
-        return amount + reward;
+        return reward;
     }
 
     function calculateReward(Stake memory currentStake)
@@ -116,14 +125,43 @@ contract Stakable {
         // multiply by the staking amount(this return 1000% yield rate /token staked)
         uint256 reward = duration * currentStake.amount;
 
-        // find the real reward by dividing with the reward rate to get  the real reward precentage(1000 / your reward rate); 
-        reward = reward * rewardRate / divideRate;
+        // find the real reward by dividing with the reward rate to get  the real reward precentage(1000 / your reward rate);
+        reward = (reward * rewardRate) / divideRate;
 
         return reward;
     }
 
-    function hasStake(address staker)
+    //function overloading to accept only 1 parameter
+    function changeReward(uint256 newRewardRate, uint256 newDivideRate)
+        internal
+        onlyOwner
+    {
+        rewardRate = newRewardRate;
+        divideRate = newDivideRate;
+    }
+
+    function changeRewardRate(uint256 newRewardRate)
         external
+        onlyOwner
+        returns (bool)
+    {
+        changeReward(newRewardRate, divideRate);
+
+        return true;
+    }
+
+    function changeDivideRate(uint256 newDivideRate)
+        external
+        onlyOwner
+        returns (bool)
+    {
+        changeReward(rewardRate, newDivideRate);
+
+        return true;
+    }
+
+    function hasStake(address staker)
+        public
         view
         returns (StakingSummary memory)
     {

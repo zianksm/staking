@@ -174,8 +174,9 @@ contract("StakingToken", async (accounts) => {
     //should be the same as the smart contract reward rate
     let rewardRate = 8;
     //should be the same as the smart contract divide rate
+    let time = 2;
     let divideRate = 100;
-    let reward = (amount * rewardRate) / divideRate;
+    let reward = (amount * time * rewardRate) / divideRate;
 
     let owner = accounts[8];
     let index = 0;
@@ -183,14 +184,18 @@ contract("StakingToken", async (accounts) => {
     await token.mint(owner, amount);
     await token.stake(amount, { from: owner });
 
-    let newbBlock = await helpers.advanceTimeAndBlock(3600 * 1);
+    let newbBlock = await helpers.advanceTimeAndBlock(3600 * time);
     let initialSummary = await token.hasStake(owner);
     let initialBalance = await token.getBalance(owner);
+
+    console.log(`initial Balance: ${initialBalance}`)
 
     await token.widthdrawStake(amount, 0, { from: owner });
 
     let afterBalance = await token.getBalance(owner);
     let afterSummary = await token.hasStake(owner);
+
+    console.log(`after withdraw Balance: ${afterBalance}`);
 
     assert.equal(
       afterSummary.stakes[index].claimable,

@@ -157,6 +157,19 @@ contract("StakingToken", async (accounts) => {
       assert.equal(error.reason, "not enough token to transfer");
     }
 
+    try {
+      let account = accounts[4];
+
+      await token.mint(account, amount);
+      await token.stake(50, { from: account });
+      await token.transfer(accounts[5], 70, { from: account });
+    } catch (error) {
+      assert.equal(
+        error.reason,
+        "not enough balance due to remaining token is being staked"
+      );
+    }
+
     let balancesBeforeTransferSender = await token.getBalance(accounts[3]);
     let balancesBeforeTransferRecipient = await token.getBalance(accounts[4]);
 

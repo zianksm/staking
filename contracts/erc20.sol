@@ -11,13 +11,7 @@ contract StakingToken is Stakable {
     string private name;
     string private symbol;
     address private owner;
-
-    modifier onlyOwner{
-        require(msg.sender == owner);
-        _;
-    }
     
-
     mapping(address => uint256) private balances;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -108,6 +102,10 @@ contract StakingToken is Stakable {
         require(receipient != address(0),"transfer to zero address is prohibited");
         require(balances[sender] >= amount, "not enough token to transfer");
 
+        StakingSummary memory userStakes = hasStake(sender);
+
+        require(userStakes.totalAmount + amount  <= balances[sender], "not enough balance due to remaining token is being staked");
+
         balances[sender] = balances[sender] - amount;
         balances[receipient] = balances[receipient] + amount;
 
@@ -125,8 +123,7 @@ contract StakingToken is Stakable {
 
         stakeLogic(amount);
 
-        _burn(msg.sender, amount);
-
+        
         return true;
     }
 
@@ -134,7 +131,8 @@ contract StakingToken is Stakable {
 
        uint256 amountToMint = withdrawLogic(amount, stake_index);
 
-        _mint(msg.sender, amountToMint);
+        //change to transfer from reserve account later
+       _mint(msg.sender,amountToMint);
 
         return true;
     }
