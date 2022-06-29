@@ -19,5 +19,6 @@ tracing-log= {version ="0.1", features =["env_logger"] }
 tracing-subscriber = "0.2"
 serde = {version = "^1", features =["derive"]}
 hex = "0.4"
+encoding_rs = "0.7.0"
 web3 = "0.17.0"
 

@@ -23,15 +23,15 @@ async fn main() -> web3::Result<()> {
         include_bytes!("./token.json"),
     )
     .unwrap();
+    
+    let account: Address = Address::from_str("0xCCd987705C24aab4e2Fbe01A4BeD025A696DEA99").unwrap();
 
-    let total_supply: U256 = contract
-        .query("getTotalSupply", (), None, Options::default(), None)
-        .await
-        .unwrap();
+    let total_supply = contract
+        .query("hasStake", account, None, Options::default(), None).await;
+        
+        
 
-    println!("Total Supply: {}", total_supply);
+    println!("Total Supply: {:?}", total_supply);
 
     Ok(())
 }
-
-

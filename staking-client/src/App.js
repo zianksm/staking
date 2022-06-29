@@ -2,7 +2,7 @@ import { Button, ButtonGroup } from "@mui/material";
 import "./App.css";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { React, useState } from "react";
-import * as user from "./getUser";
+import * as user from "./GetUser";
 
 export default function App() {
   const theme = createTheme({
@@ -28,13 +28,15 @@ export default function App() {
   });
 
   const [account, setAccount] = useState("");
-  const [balance, setBalance] = useState(0);
+  const [balances, setBalance] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
 
   const getUserData = async () => {
     const account = await user.getAccount();
-
     setAccount(account);
+    const balance = await user.getBalance(account);
+    console.log(balance);
+    setBalance(balance);
   };
 
   return (
@@ -43,9 +45,9 @@ export default function App() {
       <div className="App">
         <header className="App-header">
           <box id="account-container" className="container">
-            <h4>account : {account} </h4>
-            <h4>balance : </h4>
-            <h4>Locked : </h4>
+            <h4>account     : {account} </h4>
+            <h4>STK balance : {balances} </h4>
+            <h4>Locked      : </h4>
           </box>
           <div id="connect-button-container">
             <Button
