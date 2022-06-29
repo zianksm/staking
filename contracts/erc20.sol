@@ -11,7 +11,7 @@ contract StakingToken is Stakable {
     string private name;
     string private symbol;
     address private owner;
-    
+
     mapping(address => uint256) private balances;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -33,11 +33,11 @@ contract StakingToken is Stakable {
         emit Transfer(address(0), msg.sender, totalSupply);
     }
 
-    function getBlockTime() external  view returns(uint256){
-         return block.timestamp;
+    function getBlockTime() external view returns (uint256) {
+        return block.timestamp;
     }
 
-    function getOwner() view external returns(address){
+    function getOwner() external view returns (address) {
         return owner;
     }
 
@@ -76,9 +76,13 @@ contract StakingToken is Stakable {
         emit Transfer(address(0), account, amount);
     }
 
-    function mint(address account, uint256 amount) onlyOwner external returns(bool) {
+    function mint(address account, uint256 amount)
+        external
+        onlyOwner
+        returns (bool)
+    {
         _mint(account, amount);
-        
+
         return true;
     }
 
@@ -92,19 +96,33 @@ contract StakingToken is Stakable {
         emit Transfer(account, address(0), amount);
     }
 
-    function burn(address account, uint256 amount) onlyOwner external returns(bool){
+    function burn(address account, uint256 amount)
+        external
+        onlyOwner
+        returns (bool)
+    {
         _burn(account, amount);
 
         return true;
     }
 
-    function transferLogic(address sender, address receipient, uint256 amount) internal {
-        require(receipient != address(0),"transfer to zero address is prohibited");
+    function transferLogic(
+        address sender,
+        address receipient,
+        uint256 amount
+    ) internal {
+        require(
+            receipient != address(0),
+            "transfer to zero address is prohibited"
+        );
         require(balances[sender] >= amount, "not enough token to transfer");
 
         StakingSummary memory userStakes = hasStake(sender);
 
-        require(userStakes.totalAmount + amount  <= balances[sender], "not enough balance due to remaining token is being staked");
+        require(
+            userStakes.totalAmount + amount <= balances[sender],
+            "not enough balance due to remaining token is being staked"
+        );
 
         balances[sender] = balances[sender] - amount;
         balances[receipient] = balances[receipient] + amount;
@@ -112,27 +130,39 @@ contract StakingToken is Stakable {
         emit Transfer(sender, receipient, amount);
     }
 
-    function transfer(address receipient, uint256 amount) external returns(bool) {
-        transferLogic(msg.sender,receipient,amount);
+    function transfer(address receipient, uint256 amount)
+        external
+        returns (bool)
+    {
+        transferLogic(msg.sender, receipient, amount);
 
         return true;
     }
 
-    function stake(uint256 amount) external returns(bool) {
-        require(amount <= balances[msg.sender],"can't stake more than you own");
+    function stake(uint256 amount) external returns (bool) {
+        require(
+            amount <= balances[msg.sender],
+            "can't stake more than you own"
+        );
+        StakingSummary memory userStakes = hasStake(msg.sender);
+        require(
+            userStakes.totalAmount + amount <= balances[msg.sender],
+            "not enough balance due to remaining token is being staked"
+        );
 
         stakeLogic(amount);
 
-        
         return true;
     }
 
-    function widthdrawStake(uint256 amount, uint256 stake_index) external returns(bool) {
-
-       uint256 amountToMint = withdrawLogic(amount, stake_index);
+    function widthdrawStake(uint256 amount, uint256 stake_index)
+        external
+        returns (bool)
+    {
+        uint256 amountToMint = withdrawLogic(amount, stake_index);
 
         //change to transfer from reserve account later
-       _mint(msg.sender,amountToMint);
+        _mint(msg.sender, amountToMint);
 
         return true;
     }

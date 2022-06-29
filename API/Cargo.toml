@@ -1,0 +1,23 @@
+[package]
+name = "rust"
+version = "0.1.0"
+edition = "2021"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.8.5"
+actix-web = "4"
+config = "0.10"
+dotenv = "0.15"
+eyre = "0.4"
+color-eyre = "0.3"
+tracing = "0.1"
+tracing-futures = "0.2"
+tracing-log= {version ="0.1", features =["env_logger"] }
+tracing-subscriber = "0.2"
+serde = {version = "^1", features =["derive"]}
+hex = "0.4"
+web3 = "0.17.0"
+

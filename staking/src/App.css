@@ -16,7 +16,6 @@
   display: flex;
   flex-direction: row;
   box-shadow: 5px 8px 3px 0px rgba(0, 0, 0, 0.2);
-
 }
 
 #pub-adress-input {
@@ -24,7 +23,6 @@
   border-radius: 12px;
   text-align: center;
   box-shadow: 5px 8px 3px 0px rgba(0, 0, 0, 0.2);
-
 }
 
 .generic-button {
@@ -33,17 +31,38 @@
   text-align: center;
 }
 
-#staking-word{
+#staking-word {
   text-shadow: 1px 1px 10px #ff0000;
-
 }
 
-.Navbar{
-  min-width: 100%;
+.Navbar {
+  display: flex;
+  max-width: 100%;
+  min-height: 42px;
   position: sticky;
   top: 0;
   background-color: rgb(99, 97, 97);
   align-items: center;
   text-align: center;
   box-shadow: 5px 8px 6px 0px rgba(0, 0, 0, 0.2);
+  justify-content: center;
+}
+
+#account-container {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 5rem;
+  flex-basis: 0;
+}
+
+#connect-button-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10rem;
 }

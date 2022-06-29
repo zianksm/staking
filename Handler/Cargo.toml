@@ -1,0 +1,20 @@
+[package]
+name = "handler"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hex = "0.4"
+web3 = "0.17.0"
+tokio = { version= "1", features = ["full"] }
+config = "0.10"
+dotenv = "0.15"
+eyre = "0.4"
+color-eyre = "0.3"
+tracing = "0.1"
+tracing-futures = "0.2"
+tracing-log= {version ="0.1", features =["env_logger"] }
+tracing-subscriber = "0.2"
+serde = {version = "^1", features =["derive"]}
