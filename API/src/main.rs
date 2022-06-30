@@ -10,7 +10,7 @@ mod contract_handlers;
 use std::str::FromStr;
 use web3::contract::{Contract, Options};
 use web3::types::{Address, H160, U256};
-
+use actix_cors::Cors;
 
 
 #[actix_web::main]
@@ -24,11 +24,16 @@ async fn main() -> Result<()> {
         config.host, config.port
     );
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method();
         App::new()
+            .wrap(cors)
             .wrap(Logger::default())
             .service(total_supply)
             .service(balances)
             .service(locked_balance)
+            .service(get_contract_info)
             .route("/", web::get().to(home))
     })
     .bind(format!("{}:{}", config.host, config.port))?
@@ -57,7 +62,14 @@ async fn balances(address: web::Path<Address>) -> impl Responder {
 
 #[get("/locked_balance/{address}")]
 async fn locked_balance(address: web::Path<Address>) -> impl Responder {
-    let locked_balance = contract_handlers::OurContract::locked_balance(Address::from(address.to_fixed_bytes())).await;
+    let locked_balance:contract_handlers::StakingSummary = contract_handlers::OurContract::locked_balance(Address::from(address.to_fixed_bytes())).await;
 
     HttpResponse::Ok().json(locked_balance)
+}
+
+#[get("/contract")]
+async fn get_contract_info()-> impl Responder{
+    let info: contract_handlers::OurContract = contract_handlers::OurContract::get_contract_info().await;
+
+    HttpResponse::Ok().json(info)
 }
