@@ -1,14 +1,15 @@
 mod server_config;
-
 use server_config::Config;
 use std::env;
 use std::str::FromStr;
-
+use web3::contract::tokens::{Detokenize, Tokenizable};
 use web3::contract::{Contract, Options};
-use web3::types::{Address, H160, U256};
+use web3::types::{AccountDiff, Address, H160, U256};
+use serde_json;
 
 #[tokio::main]
-async fn main() -> web3::Result<()> {
+async fn main() 
+{
     dotenv::dotenv().ok();
 
     let config = Config::from_env().expect("loading server configurations");
@@ -23,15 +24,13 @@ async fn main() -> web3::Result<()> {
         include_bytes!("./token.json"),
     )
     .unwrap();
-    
     let account: Address = Address::from_str("0xCCd987705C24aab4e2Fbe01A4BeD025A696DEA99").unwrap();
+    let has_stakes:Box< dyn >= contract
+        .query("hasStake", account, None, Options::default(), None)
+        .await
+        .unwrap();
+        //let a = serde_json::(has_stakes).unwrap();
 
-    let total_supply = contract
-        .query("hasStake", account, None, Options::default(), None).await;
-        
-        
 
-    println!("Total Supply: {:?}", total_supply);
-
-    Ok(())
+    //println!("Total Supply: {:?}", has_stakes);
 }

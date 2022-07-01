@@ -1,17 +1,16 @@
+use crate::server_config::Config;
 use actix_web::{
     delete, get, middleware::Logger, post, put, web, App, HttpResponse, HttpServer, Responder,
 };
 use color_eyre::Result;
-use web3::transports::Http;
-use crate::server_config::Config;
 use tracing::info;
-mod server_config;
+use web3::transports::Http;
 mod contract_handlers;
+mod server_config;
+use actix_cors::Cors;
 use std::str::FromStr;
 use web3::contract::{Contract, Options};
 use web3::types::{Address, H160, U256};
-use actix_cors::Cors;
-
 
 #[actix_web::main]
 async fn main() -> Result<()> {
@@ -24,16 +23,15 @@ async fn main() -> Result<()> {
         config.host, config.port
     );
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_origin()
-            .allow_any_method();
+        let cors = Cors::default().allow_any_origin().allow_any_method();
         App::new()
             .wrap(cors)
             .wrap(Logger::default())
             .service(total_supply)
             .service(balances)
-            .service(locked_balance)
+            .service(stakes)
             .service(get_contract_info)
+            .service(test)
             .route("/", web::get().to(home))
     })
     .bind(format!("{}:{}", config.host, config.port))?
@@ -55,21 +53,37 @@ async fn total_supply() -> impl Responder {
 
 #[get("/balances/{address}")]
 async fn balances(address: web::Path<Address>) -> impl Responder {
-    let balances = contract_handlers::OurContract::balances(Address::from(address.to_fixed_bytes())).await;
+    let balances =
+        contract_handlers::OurContract::balances(Address::from(address.to_fixed_bytes())).await;
 
-    HttpResponse::Ok().json(balances.to_string())
+    HttpResponse::Ok().json(balances)
 }
+#[get("/test/{address}")]
+async fn test(address: web::Path<Address>) -> impl Responder {
+    let test = contract_handlers::OurContract::test(Address::from(address.to_fixed_bytes())).await;
 
-#[get("/locked_balance/{address}")]
-async fn locked_balance(address: web::Path<Address>) -> impl Responder {
-    let locked_balance:contract_handlers::StakingSummary = contract_handlers::OurContract::locked_balance(Address::from(address.to_fixed_bytes())).await;
-
-    HttpResponse::Ok().json(locked_balance)
+    HttpResponse::Ok().json(test)
 }
 
 #[get("/contract")]
-async fn get_contract_info()-> impl Responder{
-    let info: contract_handlers::OurContract = contract_handlers::OurContract::get_contract_info().await;
+async fn get_contract_info() -> impl Responder {
+    let info: contract_handlers::OurContract =
+        contract_handlers::OurContract::get_contract_info().await;
 
     HttpResponse::Ok().json(info)
+}
+
+/*#[post("/stake")]
+async fn stake(user_info: web::Json<contract_handlers::StakeRequest> )-> impl Responder{
+    let stake = contract_handlers::OurContract::stake(user_info.private_key.clone(),  user_info.amount_to_stake).await;
+
+    HttpResponse::Ok()
+}*/
+
+#[get("/stakes/{address}")]
+async fn stakes(address: web::Path<Address>) -> impl Responder {
+    let stakes =
+        contract_handlers::OurContract::get_stakes(Address::from(address.to_fixed_bytes())).await;
+
+    HttpResponse::Ok().json(stakes)
 }

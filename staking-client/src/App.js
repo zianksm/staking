@@ -33,9 +33,10 @@ export default function App() {
 
   const getUserData = async () => {
     const account = await user.getAccount();
-    setAccount(account);
     const balance = await user.getBalance(account);
-    console.log(balance);
+    await user.getLockedBalance();
+
+    setAccount(account);
     setBalance(balance);
   };
 
@@ -46,7 +47,7 @@ export default function App() {
         <header className="App-header">
           <box id="account-container" className="container">
             <h4>account     : {account} </h4>
-            <h4>STK balance : {balances} </h4>
+            <h4>STK balance : {balances.data} </h4>
             <h4>Locked      : </h4>
           </box>
           <div id="connect-button-container">
