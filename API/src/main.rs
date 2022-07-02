@@ -31,7 +31,6 @@ async fn main() -> Result<()> {
             .service(balances)
             .service(stakes)
             .service(get_contract_info)
-            .service(test)
             .route("/", web::get().to(home))
     })
     .bind(format!("{}:{}", config.host, config.port))?
@@ -57,12 +56,6 @@ async fn balances(address: web::Path<Address>) -> impl Responder {
         contract_handlers::OurContract::balances(Address::from(address.to_fixed_bytes())).await;
 
     HttpResponse::Ok().json(balances)
-}
-#[get("/test/{address}")]
-async fn test(address: web::Path<Address>) -> impl Responder {
-    let test = contract_handlers::OurContract::test(Address::from(address.to_fixed_bytes())).await;
-
-    HttpResponse::Ok().json(test)
 }
 
 #[get("/contract")]

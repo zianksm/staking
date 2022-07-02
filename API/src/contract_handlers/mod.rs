@@ -32,7 +32,7 @@ pub struct User {
 }
 
 #[derive(Clone, Debug)]
-pub struct Stake {
+pub struct AcceptStakes {
     total: U256,
     user: Vec<Token>,
     amount: Vec<Token>,
@@ -41,18 +41,17 @@ pub struct Stake {
 }
 
 #[derive(Clone, Debug, Serialize)]
-pub struct StakeReturn{
-    total: U256,
-    user: Vec<Address>,
-    amount: Vec<U256>,
-    timestamp: Vec<U256>,
-    claimable: Vec<U256>,
+pub struct Stakes {
+    user: Address,
+    amount: u64,
+    timestamp: u64,
+    claimable: u64,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct StakingSummary {
-    total_stakes: U256,
-    stakes: Vec<Stake>,
+    total_stakes: u64,
+    stakes: Vec<Stakes>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -65,7 +64,7 @@ pub struct PrvKey<'a> {
     pub prv_key: &'a web3::signing::SecretKeyRef<'a>,
 }
 
-impl Detokenize for Stake {
+impl Detokenize for AcceptStakes {
     fn from_tokens(tokens: Vec<Token>) -> Result<Self, web3::contract::Error> {
         let total: U256 = tokens[0].clone().into_uint().unwrap();
         let user: Vec<Token> = tokens[1].clone().into_array().unwrap();
@@ -103,21 +102,6 @@ impl Detokenize for OurContract {
     }
 }
 
-impl Detokenize for StakingSummary {
-    fn from_tokens(tokens: Vec<Token>) -> Result<Self, web3::contract::Error>
-    where
-        Self: Sized,
-    {
-        let total_stakes = tokens[0].clone().into_uint().unwrap();
-        let stakes: Vec<Stake> = Vec::new();
-
-        Ok(Self {
-            total_stakes,
-            stakes,
-        })
-    }
-}
-
 impl Detokenize for User {
     fn from_tokens(tokens: Vec<Token>) -> Result<Self, web3::contract::Error> {
         let balances: U256 = tokens[0].clone().into_uint().unwrap();
@@ -138,66 +122,68 @@ impl OurContract {
         return total_supply_;
     }
 
-    pub async fn balances(account: Address) -> U256 {
+    pub async fn balances(account: Address) -> u64 {
         let contract = contract_instance::get_contract().await;
-        //let account = Address::from(account);
 
         let balances: U256 = contract
             .query("getBalance", account, None, Options::default(), None)
             .await
             .unwrap();
 
-        return balances;
+        return U256::as_u64(&balances)
     }
 
-    pub async fn test(account: Address)-> Vec<Address>{
-        let contract = contract_instance::get_contract().await;
-        let address = contract
-            .query("test", account, account, Options::default(), None)
-            .await
-            .expect("getting testing address");
+    async fn map_stakes(stakes: AcceptStakes) -> StakingSummary {
+        let mut i = 0;
 
-            return address
+        let mut staking_summary = StakingSummary {
+            total_stakes: 0,
+            stakes: vec![],
+        };
 
+        staking_summary.total_stakes = U256::as_u64(&stakes.total);
+
+        while i < stakes.user.len() {
+            let mut user_ = stakes.user[i]
+                .clone()
+                .into_address()
+                .expect("converting user address");
+            let mut amount_ = stakes.amount[i]
+                .clone()
+                .into_uint()
+                .expect("converting staking amount");
+            let mut timestamp_ = stakes.amount[i]
+                .clone()
+                .into_uint()
+                .expect("converting staking amount");
+            let mut claimable_ = stakes.amount[i]
+                .clone()
+                .into_uint()
+                .expect("converting staking amount");
+
+            let mut stake_to_push = Stakes {
+                user: user_,
+                amount: U256::as_u64(&amount_),
+                timestamp: U256::as_u64(&timestamp_),
+                claimable: U256::as_u64(&claimable_),
+            };
+
+            staking_summary.stakes.push(stake_to_push);
+
+            i = i + 1;
+        }
+
+        return staking_summary;
     }
-    pub async fn get_stakes(account: Address) -> StakeReturn {
+
+    pub async fn get_stakes(account: Address) -> StakingSummary {
         let contract = contract_instance::get_contract().await;
-        let stakes: Stake = contract
+        let stakes: AcceptStakes = contract
             .query("hasStakePublic", account, account, Options::default(), None)
             .await
             .unwrap();
-        
-            let mut  _total = stakes.total;
-            let mut _user:Vec<Address> = Vec::new();
-            let mut _amount:Vec<U256> = Vec::new();
-            let mut _timestamp:Vec<U256> = Vec::new();
-            let mut _claimable:Vec<U256> = Vec::new();
 
-
-
-        let mut i = 0;
-
-        while i < stakes.user.len() {
-            let mut user_to_push = stakes.user[i].clone().into_address().expect("converting user address");
-            let mut amount_to_push = stakes.amount[i].clone().into_uint().expect("converting staking amount");
-            let mut timestamp_to_push = stakes.amount[i].clone().into_uint().expect("converting staking amount");
-            let mut claimable_to_push = stakes.amount[i].clone().into_uint().expect("converting staking amount");
-            
-            _user.push(user_to_push);
-            _amount.push(amount_to_push);
-            _timestamp.push(timestamp_to_push);
-            _claimable.push(claimable_to_push);
-
-            i = i +1;
-        }
-
-        let result = StakeReturn{
-            total: _total,
-            user: _user,
-            amount: _amount,
-            timestamp: _timestamp,
-            claimable: _claimable,
-        };
+        let result = OurContract::map_stakes(stakes).await;
 
         return result;
     }
