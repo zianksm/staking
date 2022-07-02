@@ -130,7 +130,7 @@ impl OurContract {
             .await
             .unwrap();
 
-        return U256::as_u64(&balances)
+        return U256::as_u64(&balances);
     }
 
     async fn map_stakes(stakes: AcceptStakes) -> StakingSummary {
@@ -152,11 +152,11 @@ impl OurContract {
                 .clone()
                 .into_uint()
                 .expect("converting staking amount");
-            let mut timestamp_ = stakes.amount[i]
+            let mut timestamp_ = stakes.timestamp[i]
                 .clone()
                 .into_uint()
                 .expect("converting staking amount");
-            let mut claimable_ = stakes.amount[i]
+            let mut claimable_ = stakes.claimable[i]
                 .clone()
                 .into_uint()
                 .expect("converting staking amount");

@@ -3,6 +3,7 @@ import "./App.css";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { React, useState } from "react";
 import * as user from "./GetUser";
+import { Box } from "@mui/system";
 
 export default function App() {
   const theme = createTheme({
@@ -26,19 +27,22 @@ export default function App() {
       },
     },
   });
+  
 
   const [account, setAccount] = useState("");
-  const [balances, setBalance] = useState(0);
-  const [lockedBalance, setLockedBalance] = useState(0);
+  const [balances, setBalance] = useState("");
+  const [lockedBalance, setLockedBalance] = useState("");
+  const [stakes, setStakes] = useState([]);
 
   const getUserData = async () => {
     const account = await user.getAccount();
     const balance = await user.getBalance(account);
-    const stakes =   await user.getStakes(account);
+    const stakes = await user.getStakes(account);
 
     setAccount(account);
     setBalance(balance);
-    setLockedBalance(stakes.data.total_stakes)
+    setLockedBalance(stakes.data.total_stakes);
+    setStakes(stakes.data.stakes);
   };
 
   return (
@@ -47,9 +51,9 @@ export default function App() {
       <div className="App">
         <header className="App-header">
           <box id="account-container" className="container">
-            <h4>account     : {account} </h4>
+            <h4>account : {account} </h4>
             <h4>STK balance : {balances.data} </h4>
-            <h4>Locked      : {lockedBalance}</h4>
+            <h4>Locked : {lockedBalance}</h4>
           </box>
           <div id="connect-button-container">
             <Button
@@ -73,7 +77,18 @@ export default function App() {
               search
             </Button>
           </box>
-          <StakeDisplay></StakeDisplay>
+          {stakes.length == 0
+            ? "hh"
+            : stakes.map((data, _id) => {
+                return (
+                  <StakeDisplay
+                    id={_id + 1}
+                    amount={data.amount}
+                    claimable={data.claimable}
+                    date={ new Date(data.timestamp*1000).toLocaleString()}
+                  ></StakeDisplay>
+                );
+              })}
         </header>
       </div>
     </ThemeProvider>
@@ -94,6 +109,15 @@ function NavBar() {
   );
 }
 
-function StakeDisplay() {
-  return <div></div>;
+function StakeDisplay(props) {
+  return (
+    <box className="stake-display">
+      <box id="stake-id">
+        <h4>Stake {props.id}</h4>
+      </box>
+      <h5>amount : {props.amount}</h5>
+      <h5>claimable : {props.claimable}</h5>
+      <h5>date : {props.date}</h5>
+    </box>
+  );
 }
