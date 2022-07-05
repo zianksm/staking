@@ -27,12 +27,17 @@ export default function App() {
       },
     },
   });
-  
 
   const [account, setAccount] = useState("");
   const [balances, setBalance] = useState("");
   const [lockedBalance, setLockedBalance] = useState("");
   const [stakes, setStakes] = useState([]);
+  const [userInput, setUserInput] = useState("");
+
+  const getUserInput = (event) => {
+    event.preventDefault();
+    setUserInput(event.target.value);
+  };
 
   const getUserData = async () => {
     const account = await user.getAccount();
@@ -42,6 +47,11 @@ export default function App() {
     setAccount(account);
     setBalance(balance);
     setLockedBalance(stakes.data.total_stakes);
+    setStakes(stakes.data.stakes);
+  };
+
+  const getStakes = async () => {
+    const stakes = await user.getStakes(userInput);
     setStakes(stakes.data.stakes);
   };
 
@@ -65,30 +75,34 @@ export default function App() {
               connect
             </Button>
           </div>
+
           <h3 id="staking-word">Search Stakes</h3>
-          <box className="container">
+          <box className="container" id="search-container">
             <input
               id="pub-adress-input"
               placeholder="Public Address"
               style={{ margin: "0 5px" }}
+              onChange={getUserInput}
             />
             <br />
-            <Button variant="text" color="orange">
+            <Button variant="text" color="orange" onClick={getStakes}>
               search
             </Button>
           </box>
-          {stakes.length == 0
-            ? "hh"
-            : stakes.map((data, _id) => {
-                return (
-                  <StakeDisplay
-                    id={_id + 1}
-                    amount={data.amount}
-                    claimable={data.claimable}
-                    date={ new Date(data.timestamp*1000).toLocaleString()}
-                  ></StakeDisplay>
-                );
-              })}
+          <div id="stakes">
+            {stakes.length == 0
+              ? ""
+              : stakes.map((data, _id) => {
+                  return (
+                    <StakeDisplay
+                      id_={_id + 1}
+                      amount={data.amount}
+                      claimable={data.claimable}
+                      date={new Date(data.timestamp * 1000).toLocaleString()}
+                    ></StakeDisplay>
+                  );
+                })}
+          </div>
         </header>
       </div>
     </ThemeProvider>
@@ -111,13 +125,15 @@ function NavBar() {
 
 function StakeDisplay(props) {
   return (
-    <box className="stake-display">
-      <box id="stake-id">
-        <h4>Stake {props.id}</h4>
+    <div className="stake-display">
+      <box id="stake-item">
+        <box id="stake-id">
+          <h4>Stake {props.id_}</h4>
+        </box>
+        <h5>amount : {props.amount}</h5>
+        <h5>claimable : {props.claimable}</h5>
+        <h5>date : {props.date}</h5>
       </box>
-      <h5>amount : {props.amount}</h5>
-      <h5>claimable : {props.claimable}</h5>
-      <h5>date : {props.date}</h5>
-    </box>
+    </div>
   );
 }

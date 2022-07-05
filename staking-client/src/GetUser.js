@@ -1,7 +1,4 @@
 import Axios from "axios";
-import Web3 from "web3";
-
-let ABI = "./token,json"
 
 export let baseurl = "http://localhost:8080";
 

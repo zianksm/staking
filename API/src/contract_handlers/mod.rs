@@ -1,19 +1,22 @@
 use crate::server_config::Config;
-use crate::total_supply;
+use crate::{total_supply, wallet_gen};
 use core::time;
+use secp256k1::{PublicKey, SecretKey};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::str::FromStr;
 use std::{env, u8};
 use tracing::info;
+use web3::confirm;
 use web3::contract::tokens::{Detokenize, Tokenizable, Tokenize};
 use web3::contract::{Contract, Options};
 use web3::ethabi::token::Token;
-use web3::types::{Address, H160, U256};
-use web3::{signing, Web3};
+use web3::signing::Key;
+use web3::types::{Address, Bytes, TransactionParameters, TransactionRequest, H160, U256, H256};
 
 mod contract_instance;
-mod key_instance;
+mod tx_instance;
+//mod key_instance;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct OurContract {
@@ -53,16 +56,31 @@ pub struct StakingSummary {
     total_stakes: u64,
     stakes: Vec<Stakes>,
 }
-
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct StakeRequest {
-    pub private_key: String,
-    pub amount_to_stake: u32,
+    pub account: String,
+    pub amount: u64,
 }
 
-pub struct PrvKey<'a> {
-    pub prv_key: &'a web3::signing::SecretKeyRef<'a>,
-}
+/*#[derive(Serialize, Deserialize)]
+pub struct _Key {
+    pub private_key: SecretKey,
+
+}*/
+
+/*impl Key for _Key {
+    fn sign(&self, message: &[u8], chain_id: Option<u64>) -> Result<web3::signing::Signature, web3::signing::SigningError> {
+        ..Default::default()
+    }
+
+    fn sign_message(&self, message: &[u8]) -> Result<web3::signing::Signature, web3::signing::SigningError> {
+        ..Default::default()
+    }
+
+    fn address(&self) -> Address {
+        ..self.address()
+    }
+}*/
 
 impl Detokenize for AcceptStakes {
     fn from_tokens(tokens: Vec<Token>) -> Result<Self, web3::contract::Error> {
@@ -112,7 +130,7 @@ impl Detokenize for User {
 
 impl OurContract {
     pub async fn total_supply() -> U256 {
-        let contract = contract_instance::get_contract().await;
+        let contract = contract_instance::get_contract_call().await;
 
         let total_supply_: U256 = contract
             .query("getTotalSupply", (), None, Options::default(), None)
@@ -123,7 +141,7 @@ impl OurContract {
     }
 
     pub async fn balances(account: Address) -> u64 {
-        let contract = contract_instance::get_contract().await;
+        let contract = contract_instance::get_contract_call().await;
 
         let balances: U256 = contract
             .query("getBalance", account, None, Options::default(), None)
@@ -177,7 +195,8 @@ impl OurContract {
     }
 
     pub async fn get_stakes(account: Address) -> StakingSummary {
-        let contract = contract_instance::get_contract().await;
+        let contract = contract_instance::get_contract_call().await;
+
         let stakes: AcceptStakes = contract
             .query("hasStakePublic", account, account, Options::default(), None)
             .await
@@ -189,7 +208,7 @@ impl OurContract {
     }
 
     pub async fn get_contract_info() -> OurContract {
-        let contract = contract_instance::get_contract().await;
+        let contract = contract_instance::get_contract_call().await;
 
         let _owner: Address = contract
             .query("getOwner", (), None, Options::default(), None)
@@ -228,30 +247,28 @@ impl OurContract {
         return info;
     }
 
-    /*TODO : figure out how to handle transactions in api(talk to kak krisna)
+ 
+
+    pub async fn get_key() -> (SecretKey, Address) {
+        let (secret_key, pub_key): (SecretKey, PublicKey) = wallet_gen::generate_keypair();
+        let pub_address = wallet_gen::public_key_address(&pub_key);
+
+        return (secret_key, pub_address);
+    }
+
     pub async fn stake(
-        private_key: String,
-        amount_to_stake: u32,
+        public_address: Address,
+        amount_to_stake: U256,
     ) -> web3::types::TransactionReceipt {
-        let contract = contract_instance::get_contract().await;
-        let prv_key_ = key_instance::get_prv_key(private_key);
-
-        let sign_key = PrvKey { prv_key: &prv_key_ };
-
-        let staking_amount = U256::from(amount_to_stake);
-
+        let contract = contract_instance::get_contract_call().await;
+      
+        let staking_amount = amount_to_stake;
 
         let res = contract
-            .signed_call_with_confirmations(
-                "stake",
-                staking_amount,
-                Options::default(),
-                0,
-                sign_key,
-            )
+            .call_with_confirmations("stake", staking_amount, public_address, Options::default(),0)
             .await
             .unwrap();
 
-        return res;
-    }*/
+        return res
+    }
 }

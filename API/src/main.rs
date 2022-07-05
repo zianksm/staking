@@ -7,10 +7,11 @@ use tracing::info;
 use web3::transports::Http;
 mod contract_handlers;
 mod server_config;
+mod wallet_gen;
 use actix_cors::Cors;
 use std::str::FromStr;
 use web3::contract::{Contract, Options};
-use web3::types::{Address, H160, U256};
+use web3::types::{Address, H160, U256, H256};
 
 #[actix_web::main]
 async fn main() -> Result<()> {
@@ -27,6 +28,8 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(cors)
             .wrap(Logger::default())
+            .service(stake)
+            .service(get_key)
             .service(total_supply)
             .service(balances)
             .service(stakes)
@@ -66,12 +69,14 @@ async fn get_contract_info() -> impl Responder {
     HttpResponse::Ok().json(info)
 }
 
-/*#[post("/stake")]
-async fn stake(user_info: web::Json<contract_handlers::StakeRequest> )-> impl Responder{
-    let stake = contract_handlers::OurContract::stake(user_info.private_key.clone(),  user_info.amount_to_stake).await;
+#[post("/stake")]
+async fn stake(user_info: web::Json<contract_handlers::StakeRequest>) -> impl Responder {
+    let stake:web3::types::TransactionReceipt =
+        contract_handlers::OurContract::stake(Address::from_str(&user_info.account).expect("converting string address"), U256::from(user_info.amount))
+            .await;
 
-    HttpResponse::Ok()
-}*/
+    HttpResponse::Ok().json(stake)
+}
 
 #[get("/stakes/{address}")]
 async fn stakes(address: web::Path<Address>) -> impl Responder {
@@ -79,4 +84,15 @@ async fn stakes(address: web::Path<Address>) -> impl Responder {
         contract_handlers::OurContract::get_stakes(Address::from(address.to_fixed_bytes())).await;
 
     HttpResponse::Ok().json(stakes)
+}
+
+#[post("/keypair")]
+async fn get_key() -> impl Responder {
+    let (secret_key, pub_address) = contract_handlers::OurContract::get_key().await;
+
+    HttpResponse::Ok().json(format!(
+        "private key: {} ,public address: {:?}",
+        secret_key.to_string(),
+        pub_address
+    ))
 }
